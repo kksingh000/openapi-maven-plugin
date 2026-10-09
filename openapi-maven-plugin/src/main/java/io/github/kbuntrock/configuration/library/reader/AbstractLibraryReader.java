@@ -98,7 +98,18 @@ public abstract class AbstractLibraryReader {
 	protected DataObject readResponseObject(final Class<?> clazz, final Method method,
 		final MergedAnnotations mergedAnnotations) {
 		final Class<?> returnType = method.getReturnType();
-		if(Void.class == returnType || Void.TYPE == returnType || !openApiTypeResolver.canResponseBeDocumented(returnType)) {
+		if(Void.class == returnType || Void.TYPE == returnType) {
+			if(isBinaryFileDownload(method, mergedAnnotations)) {
+				// A void method that writes a file directly to the response (e.g. through
+				// HttpServletResponse) still has a documentable body, even though nothing is returned.
+				DataObject dataObject = new DataObject(byte[].class, context, Flow.OUTPUT);
+				dataObject = computeFrameworkReturnObject(dataObject);
+				context.getLogger().debug(dataObject.toString());
+				return dataObject;
+			}
+			return null;
+		}
+		if(!openApiTypeResolver.canResponseBeDocumented(returnType)) {
 			return null;
 		}
 
@@ -108,6 +119,15 @@ public abstract class AbstractLibraryReader {
 		dataObject = computeFrameworkReturnObject(dataObject);
 		context.getLogger().debug(dataObject.toString());
 		return dataObject;
+	}
+
+	/**
+	 * Detect the "write a file directly to the response" pattern : a void-returning method that
+	 * both declares a binary {@code produces} content type and accepts a servlet response parameter
+	 * to write to. Overridden by readers whose framework supports this pattern (currently Spring MVC).
+	 */
+	protected boolean isBinaryFileDownload(final Method method, final MergedAnnotations mergedAnnotations) {
+		return false;
 	}
 
 	/**

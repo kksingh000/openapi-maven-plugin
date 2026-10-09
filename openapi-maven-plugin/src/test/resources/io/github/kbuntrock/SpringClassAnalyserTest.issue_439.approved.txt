@@ -1,0 +1,39 @@
+---
+openapi: 3.0.3
+info:
+  title: My Project
+  version: 10.5.36
+servers:
+  - url: ""
+tags:
+  - name: Issue439Controller
+paths:
+  /issue439/download:
+    get:
+      tags:
+        - Issue439Controller
+      operationId: download
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /issue439/json-void:
+    get:
+      tags:
+        - Issue439Controller
+      operationId: jsonVoid
+      responses:
+        "200":
+          description: successful operation
+  /issue439/no-op:
+    get:
+      tags:
+        - Issue439Controller
+      operationId: noOp
+      responses:
+        "200":
+          description: successful operation

@@ -148,6 +148,40 @@ public class SpringMvcReader extends AbstractLibraryReader {
 	}
 
 	/**
+	 * Classes of the servlet response parameter a void endpoint can write a file to directly,
+	 * across both the javax.servlet and jakarta.servlet namespaces.
+	 */
+	private static final Set<String> SERVLET_RESPONSE_PARAMETER_TYPES = new HashSet<>(Arrays.asList(
+		"javax.servlet.ServletResponse", "javax.servlet.http.HttpServletResponse",
+		"jakarta.servlet.ServletResponse", "jakarta.servlet.http.HttpServletResponse"));
+
+	@Override
+	protected boolean isBinaryFileDownload(final Method method, final MergedAnnotations mergedAnnotations) {
+		final MergedAnnotation requestMappingMergedAnnotation = mergedAnnotations
+			.get("org.springframework.web.bind.annotation.RequestMapping");
+		if(!requestMappingMergedAnnotation.isPresent()) {
+			return false;
+		}
+		final String[] produces = requestMappingMergedAnnotation.getStringArray("produces");
+		boolean declaresBinaryContentType = false;
+		for(final String mediaType : produces) {
+			if("application/octet-stream".equalsIgnoreCase(mediaType)) {
+				declaresBinaryContentType = true;
+				break;
+			}
+		}
+		if(!declaresBinaryContentType) {
+			return false;
+		}
+		for(final Class<?> parameterType : method.getParameterTypes()) {
+			if(SERVLET_RESPONSE_PARAMETER_TYPES.contains(parameterType.getCanonicalName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * See https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/arguments.html
 	 *
 	 * @param originalMethod

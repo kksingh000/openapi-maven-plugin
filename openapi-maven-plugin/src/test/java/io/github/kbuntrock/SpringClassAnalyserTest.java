@@ -29,6 +29,7 @@ import io.github.kbuntrock.resources.endpoint.issues.Issue262;
 import io.github.kbuntrock.resources.endpoint.issues.issue382.Issue382;
 import io.github.kbuntrock.resources.endpoint.issues.issue412.Issue412Controller;
 import io.github.kbuntrock.resources.endpoint.issues.issue413.Issue413Controller;
+import io.github.kbuntrock.resources.endpoint.issues.issue439.Issue439Controller;
 import io.github.kbuntrock.resources.endpoint.jackson.JacksonJsonPropertyController;
 import io.github.kbuntrock.resources.endpoint.map.MapController;
 import io.github.kbuntrock.resources.endpoint.multipartformdata.MultipartFormDataController;
@@ -1072,6 +1073,14 @@ public class SpringClassAnalyserTest extends AbstractTest {
 		checkGenerationResult(mojo.documentProject());
 
 		Mockito.verify(mojo.getContext().getLogger()).warn("A SecurityScheme without a name has been discarded.");
+	}
+
+	@Test
+	public void issue_439() throws MojoFailureException, IOException, MojoExecutionException {
+
+		final DocumentationMojo mojo = createBasicMojo(Issue439Controller.class.getCanonicalName());
+
+		checkGenerationResult(mojo.documentProject());
 	}
 
 	@Test
